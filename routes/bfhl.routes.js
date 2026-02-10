@@ -1,47 +1,76 @@
 import express from "express";
-import { validateBFHLRequest } from "../validations/bfhl.validation.js";
 import {
   fibonacci,
   isPrime,
   hcf,
   lcm
 } from "../utils/math.utils.js";
+import { askGemini } from "../utils/gemini.js";
+import { validateBFHLRequest } from "../validations/bfhl.validation.js";
 
 const router = express.Router();
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const error = validateBFHLRequest(req.body);
+    const validationError = validateBFHLRequest(req.body);
 
-    if (error) {
+    if (validationError) {
       return res.status(400).json({
         is_success: false,
-        official_email: "yourname@chitkara.edu.in",
-        error
+        official_email: process.env.OFFICIAL_EMAIL,
+        error: validationError
       });
     }
 
+ 
     const key = Object.keys(req.body)[0];
     const value = req.body[key];
-
     let data;
 
-    if (key === "fibonacci") data = fibonacci(value);
-    if (key === "prime") data = value.filter(isPrime);
-    if (key === "hcf") data = hcf(value);
-    if (key === "lcm") data = lcm(value);
+
+    switch (key) {
+      case "fibonacci":
+        data = fibonacci(value);
+        break;
+
+      case "prime":
+        data = value.filter(isPrime);
+        break;
+
+      case "hcf":
+        data = hcf(value);
+        break;
+
+      case "lcm":
+        data = lcm(value);
+        break;
+
+      case "AI":
+        data = await askGemini(value);
+        break;
+
+      default:
+        return res.status(400).json({
+          is_success: false,
+          official_email: process.env.OFFICIAL_EMAIL,
+          error: "Invalid request key"
+        });
+    }
+
 
     return res.status(200).json({
       is_success: true,
-      official_email: "yourname@chitkara.edu.in",
+      official_email: process.env.OFFICIAL_EMAIL,
       data
     });
 
-  } catch (err) {
-    return res.status(500).json({
-      is_success: false,
-      official_email: "yourname@chitkara.edu.in",
-      error: "Internal server error"
+  } catch (error) {
+    console.error("BFHL Error:", error.message);
+
+  return res.status(500).json({
+    is_success: false,
+    official_email: process.env.OFFICIAL_EMAIL,
+    error: error.message
     });
   }
 });

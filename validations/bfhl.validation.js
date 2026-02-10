@@ -21,12 +21,14 @@ export const validateBFHLRequest = (body) => {
     return "Invalid request key";
   }
 
-  
   if (key === "fibonacci" && typeof body[key] !== "number") {
     return "Fibonacci value must be a number";
   }
 
-  if ((key === "prime" || key === "hcf" || key === "lcm") && !Array.isArray(body[key])) {
+  if (
+    (key === "prime" || key === "hcf" || key === "lcm") &&
+    !Array.isArray(body[key])
+  ) {
     return `${key} must be an array of numbers`;
   }
 

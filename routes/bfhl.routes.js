@@ -5,7 +5,7 @@ import {
   hcf,
   lcm
 } from "../utils/math.utils.js";
-import { askGemini } from "../utils/gemini.js";
+import { askDeepSeek } from "../utils/deepseek.js";
 import { validateBFHLRequest } from "../validations/bfhl.validation.js";
 
 const router = express.Router();
@@ -46,8 +46,8 @@ router.post("/", async (req, res) => {
         break;
 
       case "AI":
-        data = await askGemini(value);
-        break;
+  data = await askDeepSeek(value);
+  break;
 
       default:
         return res.status(400).json({

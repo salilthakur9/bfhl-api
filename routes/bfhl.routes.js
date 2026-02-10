@@ -1,4 +1,5 @@
 import express from "express";
+import { validateBFHLRequest } from "../validations/bfhl.validation.js";
 import {
   fibonacci,
   isPrime,
@@ -10,60 +11,37 @@ const router = express.Router();
 
 router.post("/", (req, res) => {
   try {
-    const body = req.body;
+    const error = validateBFHLRequest(req.body);
 
-    // Fibonacci
-    if (body.fibonacci !== undefined) {
-      const data = fibonacci(body.fibonacci);
-      return res.status(200).json({
-        is_success: true,
+    if (error) {
+      return res.status(400).json({
+        is_success: false,
         official_email: "yourname@chitkara.edu.in",
-        data
+        error
       });
     }
 
-    // Prime
-    if (body.prime !== undefined) {
-      const data = body.prime.filter(isPrime);
-      return res.status(200).json({
-        is_success: true,
-        official_email: "yourname@chitkara.edu.in",
-        data
-      });
-    }
+    const key = Object.keys(req.body)[0];
+    const value = req.body[key];
 
-    // HCF
-    if (body.hcf !== undefined) {
-      const data = hcf(body.hcf);
-      return res.status(200).json({
-        is_success: true,
-        official_email: "yourname@chitkara.edu.in",
-        data
-      });
-    }
+    let data;
 
-    // LCM
-    if (body.lcm !== undefined) {
-      const data = lcm(body.lcm);
-      return res.status(200).json({
-        is_success: true,
-        official_email: "yourname@chitkara.edu.in",
-        data
-      });
-    }
+    if (key === "fibonacci") data = fibonacci(value);
+    if (key === "prime") data = value.filter(isPrime);
+    if (key === "hcf") data = hcf(value);
+    if (key === "lcm") data = lcm(value);
 
-    // Invalid key
-    return res.status(400).json({
-      is_success: false,
+    return res.status(200).json({
+      is_success: true,
       official_email: "yourname@chitkara.edu.in",
-      error: "Invalid request key"
+      data
     });
 
   } catch (err) {
-    return res.status(400).json({
+    return res.status(500).json({
       is_success: false,
       official_email: "yourname@chitkara.edu.in",
-      error: err.message
+      error: "Internal server error"
     });
   }
 });
